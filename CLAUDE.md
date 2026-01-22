@@ -3,15 +3,25 @@
 Two-party async contract negotiation. Users select clause options with priority/flexibility, system suggests compromises via weighted algorithm.
 
 ## Tech Stack
-Next.js 14 (App Router) | TypeScript | Tailwind | shadcn/ui | tRPC | PostgreSQL + Prisma | NextAuth
+Next.js 14 (App Router) | TypeScript | Tailwind | shadcn/ui | tRPC | PostgreSQL + Prisma | NextAuth (Google OAuth + Magic Link)
 
 ## Key Paths
 ```
 /prisma/schema.prisma                    # Data model
 /src/server/routers/                     # tRPC routers
 /src/server/services/compromise/engine.ts # Compromise algorithm
+/src/lib/totp.ts                         # TOTP 2FA utilities
 /Users/sme/NEL/skills/                   # Contract templates (external)
 ```
+
+## Authentication
+- **Google OAuth**: Primary sign-in method
+- **Magic Link**: Email-based fallback authentication
+- **Admin 2FA**: TOTP-based two-factor auth required for admin access
+  - Admin determined by `ADMIN_EMAIL` env var
+  - First login: scan QR code to setup authenticator app
+  - Subsequent logins: enter 6-digit code
+  - Session valid for 4 hours (httpOnly cookie)
 
 ## Skills (Contract Templates)
 4 types: NDA, DPA, MSA, SaaS. Each has `clauses.json` with options containing:
@@ -61,5 +71,13 @@ npm run dev                                 # Dev server (port 3000)
 ```
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/dealroom
 NEXTAUTH_SECRET=dev-secret-change-in-production
+NEXTAUTH_URL=http://localhost:3000
 SKILLS_DIR=/Users/sme/NEL/skills
+
+# Google OAuth (required for production)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Admin 2FA
+ADMIN_EMAIL=admin@example.com
 ```
