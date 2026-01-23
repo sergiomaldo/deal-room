@@ -7,11 +7,13 @@ Next.js 14 (App Router) | TypeScript | Tailwind | shadcn/ui | tRPC | PostgreSQL 
 
 ## Key Paths
 ```
-/prisma/schema.prisma                    # Data model
-/src/server/routers/                     # tRPC routers
-/src/server/services/compromise/engine.ts # Compromise algorithm
-/src/lib/totp.ts                         # TOTP 2FA utilities
-/Users/sme/NEL/skills/                   # Contract templates (external)
+/prisma/schema.prisma                      # Data model
+/src/server/routers/                       # tRPC routers
+/src/server/services/compromise/engine.ts  # Compromise algorithm
+/src/server/services/document/             # PDF generation service
+/src/app/api/deals/[id]/document/route.ts  # PDF download endpoint
+/src/lib/totp.ts                           # TOTP 2FA utilities
+/Users/sme/NEL/skills/                     # Contract templates (external)
 ```
 
 ## Authentication
@@ -50,6 +52,14 @@ stake = (priority/5 × 0.4) + ((5-flexibility)/5 × 0.3) + (|bias| × 0.3)
 5. Counter-proposals can be accepted/rejected by other party
 6. "New Round" regenerates suggestions incorporating counter-proposals
 7. All agreed → e-signature
+
+## PDF Export
+`GET /api/deals/[id]/document` - generates downloadable contract PDF
+- Auth required: user must be party to the deal
+- Deal must be AGREED, SIGNING, or COMPLETED
+- Uses `@react-pdf/renderer` for server-side generation
+- PDF includes: parties info, governing law, numbered clauses with legal text, signature block
+- Download button available on `/deals/[id]/sign` page
 
 ## UI Style
 Brutalist: dark bg (#0a0a0a), lime accent (#c8ff00), sharp corners, high contrast.
