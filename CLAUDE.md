@@ -62,7 +62,7 @@ stake = (priority/5 × 0.4) + ((5-flexibility)/5 × 0.3) + (|bias| × 0.3)
 - Download button available on `/deals/[id]/sign` page
 
 ## UI Style
-Brutalist: dark bg (#0a0a0a), lime accent (#c8ff00), sharp corners, high contrast.
+Brutalist: dark bg (#1c1f37), teal accent (#13e9d1), sharp corners, high contrast.
 
 ## Enums
 - GoverningLaw: CALIFORNIA, ENGLAND_WALES, SPAIN
