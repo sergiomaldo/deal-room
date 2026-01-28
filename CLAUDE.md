@@ -22,7 +22,7 @@ Two-party async contract negotiation with weighted compromise algorithm.
 - **PDF:** `GET /api/deals/[id]/document` (requires AGREED/SIGNING/COMPLETED status)
 
 ## UI
-Brutalist: dark bg (#1c1f37), teal accent (#13e9d1), sharp corners
+Brutalist: bg (#1c1f37), secondary (#232742), teal accent (#13e9d1), sharp corners
 
 ## Enums
 GoverningLaw: CALIFORNIA, ENGLAND_WALES, SPAIN
