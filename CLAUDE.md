@@ -18,14 +18,14 @@ docs/administration.md                     # Admin & supervisor docs
 
 ## Administration
 
-Deal Room has a two-level administration system:
+| Portal | URL | Auth Config |
+|--------|-----|-------------|
+| **Platform Admin** | `/admin` | `src/lib/auth-admin.ts` + `adminProcedure` |
+| **Supervisor** | `/supervise` | `src/lib/auth-supervisor.ts` + `supervisorProcedure` |
 
-| Portal | URL | Purpose |
-|--------|-----|---------|
-| **Platform Admin** | `/admin` | Manage marketplace, customers, supervisors |
-| **Supervisor** | `/supervise` | Monitor assigned deals only |
+Both use separate NextAuth instances with magic link + 2FA. Session cookies: `admin_session`, `supervisor_session`.
 
-Both require magic link authentication + 2FA. Same email can access multiple contexts.
+**Key files:** Custom adapters in `src/lib/admin-adapter.ts` and `supervisor-adapter.ts` map to `PlatformAdmin`/`Supervisor` tables (not User). tRPC context in `src/server/trpc.ts` decodes JWT and looks up admin/supervisor by `token.sub`.
 
 ## Quick Reference
 
