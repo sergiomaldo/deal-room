@@ -13,7 +13,19 @@ src/server/services/licensing/             # Activation & entitlements
 src/server/services/compromise/engine.ts   # Compromise algorithm
 cli/commands/                              # CLI tools
 docs/skills-and-licensing.md               # Full licensing docs
+docs/administration.md                     # Admin & supervisor docs
 ```
+
+## Administration
+
+Deal Room has a two-level administration system:
+
+| Portal | URL | Purpose |
+|--------|-----|---------|
+| **Platform Admin** | `/admin` | Manage marketplace, customers, supervisors |
+| **Supervisor** | `/supervise` | Monitor assigned deals only |
+
+Both require magic link authentication + 2FA. Same email can access multiple contexts.
 
 ## Quick Reference
 
@@ -30,6 +42,8 @@ npx prisma db seed                          # Load skills
 npm run dev                                 # Port 3000
 npm run skill:list                          # List installed skills
 npm run license:fingerprint                 # Machine ID for activation
+npm run admin:create                        # Create platform admin
+npm run supervisor:create                   # Create supervisor account
 ```
 
 ## Environment
