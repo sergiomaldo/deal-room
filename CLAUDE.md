@@ -6,52 +6,40 @@ Two-party async contract negotiation with weighted compromise algorithm.
 
 ## Key Paths
 ```
-prisma/schema.prisma                       # Data model
-src/server/routers/                        # tRPC routers
-src/server/services/skills/                # Skill packages & i18n
-src/server/services/licensing/             # Activation & entitlements
-src/server/services/compromise/engine.ts   # Compromise algorithm
-cli/commands/                              # CLI tools
-docs/skills-and-licensing.md               # Full licensing docs
-docs/administration.md                     # Admin & supervisor docs
+prisma/schema.prisma            # Data model
+src/server/routers/             # tRPC routers
+src/server/services/skills/     # Skill loading & i18n
+src/server/services/compromise/ # Compromise algorithm
+docs/administration.md          # Admin, supervisor, and skills docs
 ```
 
 ## Administration
 
-| Portal | URL | Auth Config |
-|--------|-----|-------------|
-| **Platform Admin** | `/admin` | `src/lib/auth-admin.ts` + `adminProcedure` |
-| **Supervisor** | `/supervise` | `src/lib/auth-supervisor.ts` + `supervisorProcedure` |
+| Portal | URL | Auth |
+|--------|-----|------|
+| **Platform Admin** | `/admin` | `auth-admin.ts` → `PlatformAdmin` table |
+| **Supervisor** | `/supervise` | `auth-supervisor.ts` → `Supervisor` table |
 
-Both use separate NextAuth instances with magic link + 2FA. Session cookies: `admin_session`, `supervisor_session`.
+Custom NextAuth adapters map to admin tables (not User). tRPC context decodes JWT via `token.sub`.
 
-**Key files:** Custom adapters in `src/lib/admin-adapter.ts` and `supervisor-adapter.ts` map to `PlatformAdmin`/`Supervisor` tables (not User). tRPC context in `src/server/trpc.ts` decodes JWT and looks up admin/supervisor by `token.sub`.
+## Private Skills
 
-## Quick Reference
+Skills live in separate `legalskills` repo. GitHub Action auto-seeds on push.
 
-**Compromise formula:** `stake = (priority/5 × 0.4) + ((5-flexibility)/5 × 0.3) + (|bias| × 0.3)`
-
-**Deal flow:** Create → Invite → Both submit → Algorithm suggests → Accept/Counter → Sign
-
-**Enums:** `GoverningLaw`: CALIFORNIA, ENGLAND_WALES, SPAIN | `DealRoomStatus`: DRAFT → AWAITING_RESPONSE → NEGOTIATING → AGREED → SIGNING → COMPLETED
+```bash
+SKILLS_DIR=/path/to/legalskills npx prisma db seed  # Local
+gh workflow run seed.yml                             # Trigger production
+```
 
 ## Commands
 ```bash
-npx prisma generate && npx prisma db push  # Schema changes
-npx prisma db seed                          # Load skills
-npm run dev                                 # Port 3000
-npm run skill:list                          # List installed skills
-npm run license:fingerprint                 # Machine ID for activation
-npm run admin:create                        # Create platform admin
-npm run supervisor:create                   # Create supervisor account
+npx prisma db seed              # Load skills
+npm run admin:create            # Create platform admin
+npm run supervisor:create       # Create supervisor
 ```
 
-## Environment
-```
-DATABASE_URL=postgresql://...
-NEXTAUTH_SECRET=...
-SKILLS_DIR=/path/to/skills
-ADMIN_EMAIL=admin@example.com
-```
+## Quick Reference
 
-See `docs/skills-and-licensing.md` for licensing system details.
+**Compromise:** `stake = (priority/5 × 0.4) + ((5-flexibility)/5 × 0.3) + (|bias| × 0.3)`
+
+**Enums:** `GoverningLaw`: CALIFORNIA, ENGLAND_WALES, SPAIN
