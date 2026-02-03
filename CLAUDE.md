@@ -9,8 +9,8 @@ Two-party async contract negotiation with weighted compromise algorithm.
 prisma/schema.prisma            # Data model
 src/server/routers/             # tRPC routers
 src/server/services/skills/     # Skill loading & i18n
-src/server/services/compromise/ # Compromise algorithm
-docs/administration.md          # Admin, supervisor, and skills docs
+src/server/services/licensing/  # Entitlement checks
+docs/administration.md          # Full admin & skills docs
 ```
 
 ## Administration
@@ -20,22 +20,22 @@ docs/administration.md          # Admin, supervisor, and skills docs
 | **Platform Admin** | `/admin` | `auth-admin.ts` → `PlatformAdmin` table |
 | **Supervisor** | `/supervise` | `auth-supervisor.ts` → `Supervisor` table |
 
-Custom NextAuth adapters map to admin tables (not User). tRPC context decodes JWT via `token.sub`.
+## Licensed Skills
 
-## Private Skills
+Private `legalskills` repo, auto-deployed via GitHub Action on push.
 
-Skills live in separate `legalskills` repo. GitHub Action auto-seeds on push.
+| Skill | ID |
+|-------|-----|
+| Founders Agreement | `com.nel.skills.founders` |
+| SAFE Agreement | `com.nel.skills.safe` |
 
-```bash
-SKILLS_DIR=/path/to/legalskills npx prisma db seed  # Local
-gh workflow run seed.yml                             # Trigger production
-```
+Skills with `manifest.json` require entitlement. Admin assigns at `/admin/customers`.
 
 ## Commands
 ```bash
-npx prisma db seed              # Load skills
-npm run admin:create            # Create platform admin
-npm run supervisor:create       # Create supervisor
+SKILLS_DIR=/path/to/legalskills npx prisma db seed  # Seed skills
+gh workflow run seed.yml                             # Deploy to production
+npm run admin:create                                 # Create platform admin
 ```
 
 ## Quick Reference
