@@ -43,3 +43,5 @@ npm run admin:create                                 # Create platform admin
 **Compromise:** `stake = (priority/5 × 0.4) + ((5-flexibility)/5 × 0.3) + (|bias| × 0.3)`
 
 **Enums:** `GoverningLaw`: CALIFORNIA, ENGLAND_WALES, SPAIN
+
+**Fonts:** Inter (body), Jost (metrics via `.metric` classes), Dancing Script (signatures)
