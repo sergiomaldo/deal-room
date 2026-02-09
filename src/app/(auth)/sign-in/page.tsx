@@ -63,14 +63,14 @@ export default function SignInPage() {
           <h1 className="text-3xl font-bold mb-2 text-white uppercase tracking-wide">{t("dealroom")}</h1>
           <p className="text-muted-foreground mb-4">
             {t.rich("poweredBy", {
-              link: () => (
+              link: (chunks) => (
                 <a
                   href="https://northend.law"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  North End Law
+                  {chunks}
                 </a>
               ),
             })}
@@ -88,7 +88,7 @@ export default function SignInPage() {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={isGoogleLoading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-transparent text-foreground border-2 border-border hover:bg-muted/50 hover:border-muted-foreground/30 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-transparent text-foreground border-2 border-primary/50 hover:bg-muted/50 hover:border-primary transition-colors disabled:opacity-50"
         >
           {isGoogleLoading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -176,24 +176,24 @@ export default function SignInPage() {
         <div className="mt-6 pt-6 border-t border-border text-center">
           <p className="text-xs text-muted-foreground">
             {t.rich("bySigningIn", {
-              termsLink: () => (
+              termsLink: (chunks) => (
                 <a
                   href="https://northend.law/terms-of-use"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  {t("termsOfUse")}
+                  {chunks}
                 </a>
               ),
-              privacyLink: () => (
+              privacyLink: (chunks) => (
                 <a
                   href="https://northend.law/privacy-policy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  {t("privacyPolicy")}
+                  {chunks}
                 </a>
               ),
             })}

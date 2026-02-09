@@ -45,14 +45,14 @@
     "signingIn": "Iniciando sesión...",
     "tryDemo": "Probar Demo",
     "trialDescription": "Sin registro. Explora la plataforma al instante.",
-    "bySigningIn": "Al iniciar sesión, aceptas nuestros {termsLink} y {privacyLink}",
+    "bySigningIn": "Al iniciar sesión, aceptas nuestros <termsLink>Términos de Uso</termsLink> y <privacyLink>Política de Privacidad</privacyLink>",
     "termsOfUse": "Términos de Uso",
     "privacyPolicy": "Política de Privacidad",
     "failedMagicLink": "Error al enviar el enlace mágico. Por favor intenta de nuevo.",
     "unexpectedError": "Ocurrió un error inesperado.",
     "googleSignInFailed": "Error al iniciar sesión con Google.",
     "dealroom": "Dealroom",
-    "poweredBy": "Una plataforma de negociación de contratos de {link}",
+    "poweredBy": "Una plataforma de negociación de contratos de <link>North End Law</link>",
     "secureContract": "Plataforma segura de negociación de contratos"
   },
   "deals": {
