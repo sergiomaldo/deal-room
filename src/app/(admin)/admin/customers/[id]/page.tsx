@@ -230,13 +230,13 @@ export default function CustomerDetailPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Invite Code</p>
-              {customer.inviteCode ? (
+              {customer.inviteCodes?.[0] ? (
                 <div className="flex items-center gap-2">
                   <code className="font-mono text-lg font-semibold text-primary">
-                    {customer.inviteCode}
+                    {customer.inviteCodes[0].code}
                   </code>
                   <button
-                    onClick={() => copyInviteCode(customer.inviteCode!)}
+                    onClick={() => copyInviteCode(customer.inviteCodes[0].code)}
                     className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded"
                     title="Copy invite code"
                   >
@@ -262,9 +262,9 @@ export default function CustomerDetailPage() {
                 ) : (
                   <KeyRound className="w-4 h-4" />
                 )}
-                {customer.inviteCode ? "Regenerate" : "Generate"} Code
+                {customer.inviteCodes?.[0] ? "Regenerate" : "Generate"} Code
               </button>
-              {customer.inviteCode && (
+              {customer.inviteCodes?.[0] && (
                 <button
                   onClick={() => removeInviteCodeMutation.mutate({ customerId })}
                   disabled={removeInviteCodeMutation.isPending}

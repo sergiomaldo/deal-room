@@ -24,14 +24,15 @@ export const authOptions: NextAuthOptions = {
         }
 
         const email = credentials.email.trim().toLowerCase();
-        const inviteCode = credentials.inviteCode.trim().toUpperCase();
+        const code = credentials.inviteCode.trim().toUpperCase();
 
-        // Look up customer by invite code
-        const customer = await prisma.customer.findUnique({
-          where: { inviteCode },
+        // Look up invite code with its customer
+        const inviteCode = await prisma.inviteCode.findUnique({
+          where: { code },
+          include: { customer: true },
         });
 
-        if (!customer) {
+        if (!inviteCode) {
           throw new Error("Invalid invite code");
         }
 
@@ -40,21 +41,17 @@ export const authOptions: NextAuthOptions = {
           where: { email },
         });
 
-        if (user) {
-          // Link existing user to this customer
-          user = await prisma.user.update({
-            where: { id: user.id },
-            data: { customerId: customer.id },
-          });
-        } else {
-          // Create new user linked to customer
+        if (!user) {
           user = await prisma.user.create({
-            data: {
-              email,
-              customerId: customer.id,
-            },
+            data: { email },
           });
         }
+
+        // Link this invite code to the user
+        await prisma.inviteCode.update({
+          where: { id: inviteCode.id },
+          data: { usedByUserId: user.id },
+        });
 
         return {
           id: user.id,

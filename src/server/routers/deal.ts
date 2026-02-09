@@ -228,15 +228,14 @@ export const dealRouter = createTRPCRouter({
 
       // Check entitlement if this is a licensed skill
       if (template.skillPackageId) {
-        // First try to find customer via direct link (invite code sign-in)
-        const user = await ctx.prisma.user.findUnique({
-          where: { id: userId },
-          select: { customerId: true },
+        // First try to find customer via invite code link
+        const inviteCode = await ctx.prisma.inviteCode.findFirst({
+          where: { usedByUserId: userId },
+          include: { customer: true },
+          orderBy: { createdAt: "desc" },
         });
 
-        let customer = user?.customerId
-          ? await ctx.prisma.customer.findUnique({ where: { id: user.customerId } })
-          : null;
+        let customer = inviteCode?.customer ?? null;
 
         // Fall back to email-based lookup (Google OAuth users)
         if (!customer) {

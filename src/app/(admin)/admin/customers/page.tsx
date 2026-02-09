@@ -226,8 +226,8 @@ export default function CustomersPage() {
                 </Badge>
               </div>
               <div>
-                {customer.inviteCode ? (
-                  <code className="font-mono text-xs text-primary">{customer.inviteCode}</code>
+                {customer.inviteCodes?.[0] ? (
+                  <code className="font-mono text-xs text-primary">{customer.inviteCodes[0].code}</code>
                 ) : (
                   <span className="text-muted-foreground text-xs">None</span>
                 )}

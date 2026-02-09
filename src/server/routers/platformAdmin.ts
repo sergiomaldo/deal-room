@@ -234,6 +234,10 @@ export const platformAdminRouter = createTRPCRouter({
           _count: {
             select: { entitlements: true },
           },
+          inviteCodes: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
         },
       });
     }),
@@ -287,6 +291,10 @@ export const platformAdminRouter = createTRPCRouter({
             },
             orderBy: { createdAt: "desc" },
           },
+          inviteCodes: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
         },
       });
 
@@ -319,11 +327,17 @@ export const platformAdminRouter = createTRPCRouter({
         });
       }
 
-      const inviteCode = generateInviteCode();
+      // Delete any existing invite code for this customer
+      await ctx.prisma.inviteCode.deleteMany({
+        where: { customerId: input.customerId },
+      });
 
-      return ctx.prisma.customer.update({
-        where: { id: input.customerId },
-        data: { inviteCode },
+      // Create new invite code
+      return ctx.prisma.inviteCode.create({
+        data: {
+          code: generateInviteCode(),
+          customerId: input.customerId,
+        },
       });
     }),
 
@@ -335,21 +349,11 @@ export const platformAdminRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await requireVerified2FA(ctx.adminSession.email, ctx.getCookie, ctx.prisma);
 
-      const customer = await ctx.prisma.customer.findUnique({
-        where: { id: input.customerId },
+      await ctx.prisma.inviteCode.deleteMany({
+        where: { customerId: input.customerId },
       });
 
-      if (!customer) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Customer not found",
-        });
-      }
-
-      return ctx.prisma.customer.update({
-        where: { id: input.customerId },
-        data: { inviteCode: null },
-      });
+      return { success: true };
     }),
 
   // Create entitlement (assign skill to customer)
