@@ -20,6 +20,9 @@ import {
   Edit2,
   Check,
   X,
+  KeyRound,
+  Copy,
+  Trash2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AssignSkillModal } from "@/components/admin/AssignSkillModal";
@@ -33,6 +36,7 @@ export default function CustomerDetailPage() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [editingJurisdictionsId, setEditingJurisdictionsId] = useState<string | null>(null);
   const [editedJurisdictions, setEditedJurisdictions] = useState<string[]>([]);
+  const [copiedInviteCode, setCopiedInviteCode] = useState(false);
 
   const utils = trpc.useUtils();
   const { data: customer, isLoading, error } = trpc.platformAdmin.getCustomer.useQuery({
@@ -57,6 +61,24 @@ export default function CustomerDetailPage() {
       setEditingJurisdictionsId(null);
     },
   });
+
+  const generateInviteCodeMutation = trpc.platformAdmin.generateInviteCode.useMutation({
+    onSuccess: () => {
+      utils.platformAdmin.getCustomer.invalidate({ customerId });
+    },
+  });
+
+  const removeInviteCodeMutation = trpc.platformAdmin.removeInviteCode.useMutation({
+    onSuccess: () => {
+      utils.platformAdmin.getCustomer.invalidate({ customerId });
+    },
+  });
+
+  const copyInviteCode = async (code: string) => {
+    await navigator.clipboard.writeText(code);
+    setCopiedInviteCode(true);
+    setTimeout(() => setCopiedInviteCode(false), 2000);
+  };
 
   const startEditJurisdictions = (entitlementId: string, currentJurisdictions: string[]) => {
     setEditingJurisdictionsId(entitlementId);
@@ -200,6 +222,63 @@ export default function CustomerDetailPage() {
             <p className="font-medium">
               {customer.entitlements.filter((e) => e.status === "ACTIVE").length}
             </p>
+          </div>
+        </div>
+
+        {/* Invite Code Section */}
+        <div className="mt-6 pt-6 border-t border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Invite Code</p>
+              {customer.inviteCode ? (
+                <div className="flex items-center gap-2">
+                  <code className="font-mono text-lg font-semibold text-primary">
+                    {customer.inviteCode}
+                  </code>
+                  <button
+                    onClick={() => copyInviteCode(customer.inviteCode!)}
+                    className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded"
+                    title="Copy invite code"
+                  >
+                    {copiedInviteCode ? (
+                      <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">No invite code generated</p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => generateInviteCodeMutation.mutate({ customerId })}
+                disabled={generateInviteCodeMutation.isPending}
+                className="btn-brutal flex items-center gap-2 text-sm"
+              >
+                {generateInviteCodeMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <KeyRound className="w-4 h-4" />
+                )}
+                {customer.inviteCode ? "Regenerate" : "Generate"} Code
+              </button>
+              {customer.inviteCode && (
+                <button
+                  onClick={() => removeInviteCodeMutation.mutate({ customerId })}
+                  disabled={removeInviteCodeMutation.isPending}
+                  className="p-2 text-red-500 hover:bg-red-500/10 border border-red-500/30"
+                  title="Remove invite code"
+                >
+                  {removeInviteCodeMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

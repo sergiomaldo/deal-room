@@ -12,6 +12,7 @@ import {
   Building,
   Server,
   Plus,
+  KeyRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -191,9 +192,10 @@ export default function CustomersPage() {
         </div>
       ) : (
         <div className="border border-border">
-          <div className="grid grid-cols-5 gap-4 p-3 bg-muted/30 text-xs font-medium text-muted-foreground uppercase">
+          <div className="grid grid-cols-6 gap-4 p-3 bg-muted/30 text-xs font-medium text-muted-foreground uppercase">
             <div>Customer</div>
             <div>Type</div>
+            <div>Invite Code</div>
             <div>Entitlements</div>
             <div>Created</div>
             <div>Actions</div>
@@ -201,7 +203,7 @@ export default function CustomersPage() {
           {customers?.map((customer) => (
             <div
               key={customer.id}
-              className="grid grid-cols-5 gap-4 p-3 border-t border-border items-center text-sm"
+              className="grid grid-cols-6 gap-4 p-3 border-t border-border items-center text-sm"
             >
               <div>
                 <p className="font-medium">{customer.name}</p>
@@ -222,6 +224,13 @@ export default function CustomersPage() {
                   )}
                   {customer.type}
                 </Badge>
+              </div>
+              <div>
+                {customer.inviteCode ? (
+                  <code className="font-mono text-xs text-primary">{customer.inviteCode}</code>
+                ) : (
+                  <span className="text-muted-foreground text-xs">None</span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Package className="w-4 h-4 text-muted-foreground" />

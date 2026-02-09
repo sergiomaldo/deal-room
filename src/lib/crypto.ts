@@ -74,6 +74,17 @@ export function generateInstanceId(): string {
 }
 
 /**
+ * Generate an invite code in the format: INV-XXXX-XXXX
+ */
+export function generateInviteCode(): string {
+  const segments: string[] = [];
+  for (let i = 0; i < 2; i++) {
+    segments.push(randomBytes(2).toString("hex").toUpperCase());
+  }
+  return `INV-${segments.join("-")}`;
+}
+
+/**
  * Generate a license key in the format: LIC-XXXX-XXXX-XXXX-XXXX
  */
 export function generateLicenseKey(): string {

@@ -228,10 +228,22 @@ export const dealRouter = createTRPCRouter({
 
       // Check entitlement if this is a licensed skill
       if (template.skillPackageId) {
-        // Find customer by email
-        const customer = await ctx.prisma.customer.findFirst({
-          where: { email: userEmail },
+        // First try to find customer via direct link (invite code sign-in)
+        const user = await ctx.prisma.user.findUnique({
+          where: { id: userId },
+          select: { customerId: true },
         });
+
+        let customer = user?.customerId
+          ? await ctx.prisma.customer.findUnique({ where: { id: user.customerId } })
+          : null;
+
+        // Fall back to email-based lookup (Google OAuth users)
+        if (!customer) {
+          customer = await ctx.prisma.customer.findFirst({
+            where: { email: userEmail },
+          });
+        }
 
         if (!customer) {
           throw new TRPCError({

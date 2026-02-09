@@ -1,11 +1,8 @@
 import { type NextAuthOptions } from "next-auth";
-import EmailProvider from "next-auth/providers/email";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { Resend } from "resend";
 import prisma from "@/lib/prisma";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as NextAuthOptions["adapter"],
@@ -14,30 +11,57 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-    EmailProvider({
-      from: process.env.EMAIL_FROM,
-      sendVerificationRequest: async ({ identifier: email, url }) => {
-        try {
-          await resend.emails.send({
-            from: process.env.EMAIL_FROM || "onboarding@resend.dev",
-            to: email,
-            subject: "Sign in to Deal Room",
-            html: `
-              <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
-                <h1 style="color: #13e9d1; background: #1c1f37; padding: 20px; margin: 0;">Deal Room</h1>
-                <div style="padding: 20px; background: #f5f5f5;">
-                  <p>Click the button below to sign in to Deal Room:</p>
-                  <a href="${url}" style="display: inline-block; background: #1c1f37; color: #13e9d1; padding: 12px 24px; text-decoration: none; font-weight: bold; margin: 20px 0;">Sign In</a>
-                  <p style="color: #666; font-size: 14px;">If you didn't request this email, you can safely ignore it.</p>
-                  <p style="color: #666; font-size: 12px;">Or copy this link: ${url}</p>
-                </div>
-              </div>
-            `,
-          });
-        } catch (error) {
-          console.error("Failed to send verification email:", error);
-          throw new Error("Failed to send verification email");
+    CredentialsProvider({
+      id: "invite-code",
+      name: "Invite Code",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        inviteCode: { label: "Invite Code", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.inviteCode) {
+          throw new Error("Email and invite code are required");
         }
+
+        const email = credentials.email.trim().toLowerCase();
+        const inviteCode = credentials.inviteCode.trim().toUpperCase();
+
+        // Look up customer by invite code
+        const customer = await prisma.customer.findUnique({
+          where: { inviteCode },
+        });
+
+        if (!customer) {
+          throw new Error("Invalid invite code");
+        }
+
+        // Find existing user or create one
+        let user = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (user) {
+          // Link existing user to this customer
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { customerId: customer.id },
+          });
+        } else {
+          // Create new user linked to customer
+          user = await prisma.user.create({
+            data: {
+              email,
+              customerId: customer.id,
+            },
+          });
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
       },
     }),
   ],
@@ -90,7 +114,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/sign-in",
-    verifyRequest: "/verify-request",
     error: "/auth-error",
   },
 };

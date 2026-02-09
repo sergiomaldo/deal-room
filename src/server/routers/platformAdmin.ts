@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, adminProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { generateLicenseKey } from "@/lib/crypto";
+import { generateLicenseKey, generateInviteCode } from "@/lib/crypto";
 import {
   createEntitlement,
   suspendEntitlement,
@@ -298,6 +298,58 @@ export const platformAdminRouter = createTRPCRouter({
       }
 
       return customer;
+    }),
+
+  // Generate an invite code for a customer
+  generateInviteCode: adminProcedure
+    .input(z.object({
+      customerId: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await requireVerified2FA(ctx.adminSession.email, ctx.getCookie, ctx.prisma);
+
+      const customer = await ctx.prisma.customer.findUnique({
+        where: { id: input.customerId },
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+
+      const inviteCode = generateInviteCode();
+
+      return ctx.prisma.customer.update({
+        where: { id: input.customerId },
+        data: { inviteCode },
+      });
+    }),
+
+  // Remove invite code from a customer
+  removeInviteCode: adminProcedure
+    .input(z.object({
+      customerId: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await requireVerified2FA(ctx.adminSession.email, ctx.getCookie, ctx.prisma);
+
+      const customer = await ctx.prisma.customer.findUnique({
+        where: { id: input.customerId },
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+
+      return ctx.prisma.customer.update({
+        where: { id: input.customerId },
+        data: { inviteCode: null },
+      });
     }),
 
   // Create entitlement (assign skill to customer)
